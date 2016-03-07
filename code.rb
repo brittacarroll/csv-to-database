@@ -12,34 +12,37 @@ def db_connection
   end
 end
 
-#
-# sql_1 = "CREATE TABLE ingredient_list5 (
-#   id SERIAL PRIMARY KEY,
-#   ingredient VARCHAR(255)
-# );"
-#
-#
-# @ingredient_array = []
-# CSV.foreach('ingredients.csv', headers: true) do |row|
-#   @ingredient_array << row.to_h
+#possibly use (below)
+# enco = PG::TextEncoder::CopyRow.new
+# conn.copy_data "COPY my_table FROM STDIN", enco do
+#   conn.put_copy_data ['index', 'data', 'to', 'copy']
+#   conn.put_copy_data ['more', 'data', 'to', 'copy']
 # end
-#   # binding.pry
 #
-#
-# # read_csv
-#
-#
-# db_connection do |conn|
-#   conn.exec(sql_1)
-#   @ingredient_array.each do |one|
-#     # binding.pry
-#     conn.exec("INSERT INTO ingredient_list5 (ingredient) VALUES ('#{one["ingredient"]}');")
+# conn.copy_data "COPY my_table TO STDOUT CSV" do
+#   while row=conn.get_copy_data
+#     p row
 #   end
-#   # output = conn.exec("SELECT * FROM ingredient_list4;")
-#   # puts output.getvalue(0,0)
 # end
+#
+# possibly use (above)
 
-@ingredient_table = db_connection { |conn| conn.exec("SELECT id, ingredient FROM ingredient_list4") }
-@ingredient_table.to_a.each do |ingredient|
-  puts "#{ingredient["id"]}. #{ingredient["ingredient"]}"
+sql_1 = "CREATE TABLE ingredient_list13 (
+  id SERIAL PRIMARY KEY,
+  ingredient VARCHAR(255)
+);"
+
+
+@ingredient_array = []
+CSV.foreach('ingredients.csv', headers: true) do |row|
+  @ingredient_array << row.to_h
+end
+
+db_connection do |conn|
+  conn.exec(sql_1)
+  @ingredient_array.each do |one|
+    conn.exec("INSERT INTO ingredient_list13 (ingredient) VALUES ('#{one["ingredient"]}');")
+  end
+  output = conn.exec("SELECT * FROM ingredient_list13;")
+  output.each_row {|column1, column2| puts "#{column1}. #{column2}" }
 end
